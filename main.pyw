@@ -223,16 +223,16 @@ class FileContentCopier(ctk.CTk):
         self.tree["columns"] = ("fullpath",); self.tree.column("#0", anchor="w", width=400); self.tree.column("fullpath", width=0, stretch=tk.NO)
         self.tree.heading("#0", text="Project Browser", anchor="w")
         
-        # Empty state message
+        # Empty state message (use place, not grid, to avoid re-grid side-effects)
         self.empty_state_label = ctk.CTkLabel(
-            self.tree_panel, 
+            self.tree_panel,
             text="📁 No Project Selected\n\nClick 'Select Project Directory' above\nto browse your project files",
             font=ctk.CTkFont(size=16),
             text_color="#888888",
             justify="center"
         )
-        self.empty_state_label.grid(row=1, column=0, sticky="nsew", padx=20, pady=20)
-        self.empty_state_label.grid_remove()  # Initially hidden
+        # Hidden by default; we will place it when needed
+        self.empty_state_label.place_forget()
 
         # --- 5. Middle Panel (Control Buttons) ---
         self.controls_panel = ctk.CTkFrame(self)
@@ -707,11 +707,12 @@ class FileContentCopier(ctk.CTk):
         """Shows the empty state message and hides the tree view."""
         self.tree.grid_remove()
         self.tree_scrollbar.grid_remove()
-        self.empty_state_label.grid()
+        # Center the label over the tree area using place
+        self.empty_state_label.place(relx=0.5, rely=0.5, anchor="center")
     
     def show_tree_view(self):
         """Shows the tree view and hides the empty state message."""
-        self.empty_state_label.grid_remove()
+        self.empty_state_label.place_forget()
         self.tree.grid()
         self.tree_scrollbar.grid()
 
