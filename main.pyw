@@ -150,6 +150,12 @@ class FileContentCopier(ctk.CTk):
         super().__init__()
         self.title("File Content Copier V5.6")
         self.geometry("1200x750")
+        
+        # Set app icon
+        try:
+            self.iconbitmap("app_icon.ico")
+        except:
+            pass  # Continue if icon file is not found
 
         # --- 1. App Setup & Variables ---
         self.icon_map = { 
@@ -216,6 +222,17 @@ class FileContentCopier(ctk.CTk):
         self.tree.configure(yscrollcommand=self.tree_scrollbar.set)
         self.tree["columns"] = ("fullpath",); self.tree.column("#0", anchor="w", width=400); self.tree.column("fullpath", width=0, stretch=tk.NO)
         self.tree.heading("#0", text="Project Browser", anchor="w")
+        
+        # Empty state message
+        self.empty_state_label = ctk.CTkLabel(
+            self.tree_panel, 
+            text="📁 No Project Selected\n\nClick 'Select Project Directory' above\nto browse your project files",
+            font=ctk.CTkFont(size=16),
+            text_color="#888888",
+            justify="center"
+        )
+        self.empty_state_label.grid(row=1, column=0, sticky="nsew", padx=20, pady=20)
+        self.empty_state_label.grid_remove()  # Initially hidden
 
         # --- 5. Middle Panel (Control Buttons) ---
         self.controls_panel = ctk.CTkFrame(self)
@@ -244,6 +261,9 @@ class FileContentCopier(ctk.CTk):
         
         # Start pulsing animation for the select directory button
         self.start_pulsing_animation()
+        
+        # Show empty state initially
+        self.show_empty_state()
     
     # --- Settings and Project Management ---
     
@@ -282,6 +302,9 @@ class FileContentCopier(ctk.CTk):
         
         # Stop the pulsing animation since a project has been selected
         self.stop_pulsing_animation()
+        
+        # Hide empty state and show tree
+        self.show_tree_view()
         
         # Clear current state
         for i in self.tree.get_children(): self.tree.delete(i)
@@ -545,6 +568,9 @@ class FileContentCopier(ctk.CTk):
         
         # Build tree structure from paths
         self._build_tree_from_paths(sorted(paths_to_show), "")
+        
+        # Ensure tree view is visible
+        self.show_tree_view()
     
     def _build_tree_from_paths(self, paths, parent_id):
         """Builds tree structure from a list of paths."""
@@ -592,6 +618,9 @@ class FileContentCopier(ctk.CTk):
         
         # Rebuild from stored data
         self._rebuild_tree_recursive(self.full_tree_data, "")
+        
+        # Ensure tree view is visible
+        self.show_tree_view()
     
     def _rebuild_tree_recursive(self, data_list, parent_id):
         """Recursively rebuilds the tree from stored data."""
@@ -673,6 +702,18 @@ class FileContentCopier(ctk.CTk):
             self.copy_button.configure(
                 border_width=0
             )
+    
+    def show_empty_state(self):
+        """Shows the empty state message and hides the tree view."""
+        self.tree.grid_remove()
+        self.tree_scrollbar.grid_remove()
+        self.empty_state_label.grid()
+    
+    def show_tree_view(self):
+        """Shows the tree view and hides the empty state message."""
+        self.empty_state_label.grid_remove()
+        self.tree.grid()
+        self.tree_scrollbar.grid()
 
 # --- Application Entry Point ---
 if __name__ == "__main__":
